@@ -1,0 +1,2 @@
+.cdp-tooltip { position: absolute; right: 10px; top: 10px; width: 300px; z-index: 99999; }
+.cdp-tooltip-item { margin-bottom: 10px; }

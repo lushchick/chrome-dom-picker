@@ -1,0 +1,34 @@
+{
+    "name": "ChromeDOMPicker",
+    "version": "0.0.1",
+    "manifest_version": 2,
+    "description": "This Chrome extension allows you to pick DOM nodes on any webpage and send selection to your client script for further processing.",
+    "icons": {
+        "128": "icon-128.png"
+    },
+    "browser_action": {
+        "default_icon": "icon-128.png",
+        "default_title": "Chrome DOM Picker",
+        "default_popup": "src/popup.html"
+    },
+    "background": {
+        "scripts": [
+            "thirdparty/js/jquery.min.js",
+            "src/event_page.js"
+        ],
+        "persistent": false
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "css": ["src/content_style.css"],
+            "js": [
+                "src/content_script.js"
+            ]
+        }
+    ],
+    "permissions": [
+        "tabs", "<all_urls>"
+    ],
+    "content_security_policy": "script-src 'self'; object-src 'self'"
+}
