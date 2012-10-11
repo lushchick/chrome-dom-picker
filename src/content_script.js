@@ -13,7 +13,7 @@ console.log('Content script loaded');
         })(),
         isKnownMessageEvent = function(name) {
             for (var i in messageEvents) {
-                if (messageEvents.hasOwnProperty(i)) {
+                if (messageEvents.hasOwnProperty(i) && i === name) {
                     return true;
                 }
             }
