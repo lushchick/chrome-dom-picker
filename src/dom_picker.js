@@ -44,13 +44,8 @@
     $.fn.dompicker = function(event, options) {
         var $this = $(this),
             defaults = {
-                hoverStyles: {
-                    backgroundColor: 'lightblue',
-                    opacity: .7
-                },
-                selectedStyles: {
-                    backgroundColor: 'lightskyblue'
-                }
+                selectedClass: 'cdp-selected',
+                hoveredClass: 'cdp-hovered'
             },
             data = (function() {
                 var ns = 'cdp';
@@ -61,35 +56,41 @@
             })(),
             events = {
                 show: function() {
-                    if ($.isEmptyObject(data.css)) {
-                        data.css = {};
-                        $.each(options.hoverStyles, function(key) {
-                            data.css[key] = $this.css(key);
-                        });
-                    }
-
                     if (!data.selected) {
-                        $this.css(options.hoverStyles);
+                        $this.addClass(options.hoveredClass);
                     }
                 },
                 hide: function() {
-                    if (data.css && !data.selected) {
-                        $this.css(data.css);
+                    if (!data.selected) {
+                        $this.removeClass(options.hoveredClass);
                     }
                 },
                 click: function() {
-                    data.selected = !data.selected;
-                    var messageType = 'onNode' + (data.selected ? 'Select' : 'Deselect'),
-                        styles = data.selected ? options.selectedStyles : data.css;
+                    // if some of the parents is selected - do nothing
+                    if ($this.parents('.' + options.selectedClass).length)
+                        return;
 
-                    $this.css(styles);
+                    var message = {};
+                    data.selected = !data.selected;
+                    if (data.selected) {
+                        $this
+                            .removeClass(options.hoveredClass)
+                            .addClass(options.selectedClass);
+                        message.type = 'nodeSelect';
+                    } else {
+                        $this.removeClass(options.selectedClass);
+                        message.type = 'nodeDeselect';
+                    }
+
+                    message.node = {
+                        id: $this.prop($.expando),
+                        tagName: $this.prop('tagName').toLowerCase(),
+                        xPath: getElementXPath($this[0])
+                    };
+
                     chrome.extension.sendMessage(null, {
-                        type: messageType,
-                        node: {
-                            id: $this.prop($.expando),
-                            tagName: $this.prop('tagName').toLowerCase(),
-                            xPath: getElementXPath($this[0])
-                        }
+                        type: 'proxy',
+                        data: message
                     });
                 }
             };

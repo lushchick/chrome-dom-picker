@@ -1,4 +1,3 @@
-console.log('Content script loaded');
 (function() {
     var messageEventPrefix = 'cdp',
         messageEvents = (function() {
@@ -47,7 +46,7 @@ console.log('Content script loaded');
 
             setTimeout(closeTooltip, 5e3);
         },
-        onMessage = function(event) {
+        onMessage = function(event, sender, callback) {
             var container, handler, parts, type;
             if (event instanceof MessageEvent) {
                 parts = event.data.type ? event.data.type.split('.') : [];
@@ -56,30 +55,39 @@ console.log('Content script loaded');
                     || parts[0] !== messageEventPrefix
                     || !isKnownMessageEvent(type = parts[1])
                 ) {
+                    // unknown message, do not process
                     return;
                 }
                 event.data.type = type;
                 container = messageEventHandlers;
             } else {
+                // received message from event page
                 type = event.type;
                 container = eventPageMessageHandlers;
             }
 
             handler = (typeof container[type] === 'function') ? type : 'def';
-            container[handler].apply(this, arguments);
+            container[handler].apply(this, Array.prototype.slice.call(arguments));
+
+            if (callback) {
+                // promise to fire a callback
+                return true;
+            }
         }
 
     this.messageEventHandlers = {
         def: function(event) {
-            console.log('Default messageEventHandler', arguments);
             // just proxy received message to background script
             chrome.extension.sendMessage(null, event.data || {});
         }
     };
 
     this.eventPageMessageHandlers = {
-        def: function() {
-            console.log('Default eventPageMessageHandler', arguments);
+        def: function() {},
+        proxy: function(req) {
+            console.log('content page proxy', req);
+            req.data.type = messageEventPrefix + '.' + req.data.type;
+            window.postMessage(req.data, '*');
         }
     }
 
