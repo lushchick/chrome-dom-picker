@@ -73,7 +73,7 @@
                 // promise to fire a callback
                 return true;
             }
-        }
+        };
 
     this.messageEventHandlers = {
         def: function(event) {
@@ -89,7 +89,7 @@
             req.data.type = messageEventPrefix + '.' + req.data.type;
             window.postMessage(req.data, '*');
         }
-    }
+    };
 
     window.addEventListener('message', onMessage, false);
     chrome.extension.onMessage.addListener(onMessage);
