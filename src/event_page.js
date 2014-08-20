@@ -46,6 +46,8 @@
             var url = req.data.url.match(/^https?/i) ? req.data.url : 'http://' + req.data.url,
 
                 onSelectedTab = function(tab) {
+                    mainTab = tab;
+
                     loadAssets(tab, {
                         js: ['thirdparty/js/jquery.min.js', 'thirdparty/js/bootstrap.min.js']
                     });
